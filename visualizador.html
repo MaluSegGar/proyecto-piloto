@@ -1,0 +1,713 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>PROYECTO PILOTO</title>
+		<meta charset="utf-8" />
+        <link rel="shortcut icon" href="imagenes/mapa.png" />
+        
+        <!-- Librerías de bootstrap -->
+        <link href="bootstrap-5.3.1-dist/css/bootstrap.min.css" rel="stylesheet"  crossorigin="anonymous">
+        <script src="bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js" type="text/javascript" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+
+        
+        <link rel="stylesheet" href="bootstrap-5.3.1-dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="bootstrap-5.3.1-dist/css/bootstrap-utilities.min.css"/>
+                
+        <!-- Librerías de leaflet -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+        <!-- Draw-->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw-src.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+	
+        <!-- Slide menu-->
+        <link rel="stylesheet" href="libs/slide_menu/SlideMenu.css" />
+        <script src="libs/slide_menu/SlideMenu.js"></script>
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+	
+        <!-- Geocodificardor-->
+        <link rel="stylesheet" href="libs/Control.OSMGeocoder.css"/>
+        <script src="libs/Control.OSMGeocoder.js"></script>
+	
+        <!-- Mapa de referencia-->
+        <link rel="stylesheet" href="libs/overview/MiniMap.css" />
+        <script src="libs/overview/MiniMap.js"></script>
+ 
+        <!-- Localización -->
+        <link rel="stylesheet" href="libs/L.Control.Locate.min.css" />
+        <script src="libs/L.Control.Locate.js"></script>
+	
+        <!--  Posición del mouse-->
+        <link rel="stylesheet" href="libs/L.Control.MousePosition.css" />
+        <script src="libs/L.Control.MousePosition.js"></script>
+	
+        <!-- Barra de navegación
+        <link rel="stylesheet" href="libs/NavBar/NavBar.css"/>
+        <script src="libs/NavBar/NavBar.js"></script> -->   
+        
+        <link rel="stylesheet" type="text/css" href="assets/css/estilos.css">
+    </head>
+    
+    
+    <body>
+        <!-- Librerías de bootstrap -->
+        <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js" integrity="sha384-q9CRHqZndzlxGLOj+xrdLDJa9ittGte1NksRmgJKeCV9DrM7Kz868XYqsKWPpAmn" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+
+        <!-- Librería de JQuery-->
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+
+        <!--- navbar--->
+        <div id="mapid"></div>
+        <script>
+            var OpenStreetMap = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+            var WorldImagery = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+            /*var Google = L.tileLayer('http://www.google.cn/maps/vt?lyrs=m@189&gl=cn&x={x}&y={y}&z={z}');*/
+            var ESRIStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}');
+            var TopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png');
+           
+            var map = L.map('mapid', {
+                layers: [WorldImagery],
+                center: [19.284618, -99.677603],
+                maxZoom: 22,
+                zoom:8
+            });
+
+            // Creamos el control de los mapas base
+            var baseLayers = {
+                "OSM": OpenStreetMap,
+                "ESRI Satélite": WorldImagery,
+                "ESRI Calles": ESRIStreet,
+                "Topográfico": TopoMap
+            }
+
+
+            // DEFINICION DE LAS CAPAS DE GEOSERVER
+            var colonia = L.tileLayer.wms("http://localhost:8080/geoserver/cart_base/wms", {
+                layers: 'cart_base:colonia',
+                visible: true,
+                format: 'image/png',
+                opacity: 1,
+                transparent: true,
+                maxZoom: 18,
+                version: '1.0.0',
+                attribution: 'IGECEM'
+            });
+            var distritoFederal = L.tileLayer.wms("http://localhost:8080/geoserver/cart_base/wms", {
+                layers: 'cart_base:distrito_federal',
+                visible: true,
+                format: 'image/png',
+                opacity: 1,
+                transparent: true,
+                maxZoom: 18,
+                version: '1.0.0',
+                attribution: 'IGECEM'
+            });            
+            var distritoLocal = L.tileLayer.wms("http://localhost:8080/geoserver/cart_base/wms", {
+                layers: 'cart_base:distrito_local',
+                visible: true,
+                format: 'image/png',
+                opacity: 1,
+                transparent: true,
+                maxZoom: 18,
+                version: '1.0.0',
+                attribution: 'IGECEM'
+            });
+            var distritoLocalDL = L.tileLayer.wms("http://localhost:8080/geoserver/cart_base/wms", {
+                layers: 'cart_base:distritoLocalDL',
+                visible: true,
+                format: 'image/png',
+                opacity: 1,
+                transparent: true,
+                maxZoom: 18,
+                version: '1.0.0',
+                attribution: 'IGECEM'
+            });
+            var seccion = L.tileLayer.wms("http://localhost:8080/geoserver/cart_base/wms", {
+                layers: 'cart_base:seccion',
+                visible: true,
+                format: 'image/png',
+                opacity: 1,
+                transparent: true,
+                maxZoom: 18,
+                version: '1.0.0',
+                attribution: 'IGECEM'
+            });
+            var vocalDistrlRFE = L.tileLayer.wms("http://localhost:8080/geoserver/cart_base/wms", {
+                layers: 'cart_base:vocal_distrital_del_rfe',
+                visible: true,
+                format: 'image/png',
+                opacity: 1,
+                transparent: true,
+                maxZoom: 18,
+                version: '1.0.0',
+                attribution: 'IGECEM'
+            });
+            var vocalEjecDistrl = L.tileLayer.wms("http://localhost:8080/geoserver/cart_base/wms", {
+                layers: 'cart_base:vocal_ejecutivo_distrital',
+                visible: true,
+                format: 'image/png',
+                opacity: 1,
+                transparent: true,
+                maxZoom: 18,
+                version: '1.0.0',
+                attribution: 'IGECEM'
+            });
+           var vocalEjecEstat = L.tileLayer.wms("http://localhost:8080/geoserver/cart_base/wms", {
+                layers: 'cart_base:vocal_ejecutivo_estatal',
+                visible: true,
+                format: 'image/png',
+                opacity: 1,
+                transparent: true,
+                maxZoom: 18,
+                version: '1.0.0',
+                attribution: 'IGECEM'
+            });
+            var vocalEjecEstatRFE = L.tileLayer.wms("http://localhost:8080/geoserver/cart_base/wms", {
+                layers: 'cart_base:vocal_estatal_del_rfe',
+                visible: true,
+                format: 'image/png',
+                opacity: 1,
+                transparent: true,
+                maxZoom: 18,
+                version: '1.0.0',
+                attribution: 'IGECEM'
+            });
+            
+            //agregamos control de capas
+            var controlCapas = L.control({position: 'topright'});
+            controlCapas.onAdd = function (map){
+                var div = L.DomUtil.create('div', 'info legend');
+                div.innerHTML = '<table border="0" width="100%"><tr><td><input name="checkbox1" type="checkbox" id="layer1" onclick="encenderCapas(this.value);" value="colonia" /> Colonia<br><input name="checkbox2" type="checkbox" id="layer2" onclick="encenderCapas(this.value);" value="distritoFederal"/> Distrito Federal<br><input name="checkbox3" type="checkbox" id="layer3" onclick="encenderCapas(this.value);" value="distritoLocal"/> Distrito Local<br><input name="checkbox4" type="checkbox" id="layer4" onclick="encenderCapas(this.value);" value="seccion"/> Seccion<br><input name="checkbox5" type="checkbox" id="layer5" onclick="encenderCapas(this.value);" value="vocalDistrlRFE"/> Vocal Distrital del RFE<br><input name="checkbox6" type="checkbox" id="layer6" onclick="encenderCapas(this.value);" value="vocalEjecDistrl"/> Vocal Ejecutivo Distrital<br><input name="checkbox7" type="checkbox" id="layer7" onclick="encenderCapas(this.value);" value="vocalEjecEstat"/> Vocal Ejecutivo Estatal<br><input name="checkbox8" type="checkbox" id="layer8" onclick="encenderCapas(this.value);" value="vocalEjecEstatRFE"/> Vocal Estatal RFE<br><input name="checkbox9" type="checkbox" id="layer9" onclick="encenderCapas(this.value);" value="distritoLocalDL"/> Distrito Local Partidos<table>';
+                return div;
+            };
+            controlCapas.addTo(map);
+
+            // Creamos el control de capas (Tabla de contenido)
+            // Aquí vamos a incorporar nuestras capas (Geoserver)
+            var overlays = {
+                "Colonia": colonia,
+                "Disrtito Federal": distritoFederal ,
+                "Distrito Local": distritoLocal ,
+                "Distrito Local DL": distritoLocalDL ,
+                "Seccion": seccion,
+                "Vocal Distrital RFE": vocalDistrlRFE,
+                "Vocal Ejecutivo Distrital": vocalEjecDistrl,
+                "Vocal Ejecutivo Estatal": vocalEjecEstat,
+                "Vocal Estatal RFE": vocalEjecEstatRFE
+                };
+
+            // Agregamos la ventana de mapas base y capas al mapa
+            //L.control.layers(baseLayers, overlays).addTo(map);
+            L.control.layers(baseLayers, overlays).addTo(map);
+
+            // Agregar el mapa de referencia
+            var osm2 = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+            var miniMap = new L.Control.MiniMap(osm2, { toggleDisplay: true, position:'bottomleft', width:'100', height:'100'}).addTo(map);
+            
+            // Agregar el control de escala del mapa
+            L.control.scale({position:'bottomright'}).addTo(map);
+            // Barra de navegación
+            //L.control.navbar({position: 'topleft'}).addTo(map);
+
+            // Coordenadas de la posición del mouse
+            L.control.mousePosition().addTo(map);
+
+            // Geolocalizador
+            L.control.locate().addTo(map);
+
+            // Agregar el buscador
+            var osmGeocoder = new L.Control.OSMGeocoder();
+            map.addControl(osmGeocoder);
+
+            
+            // Barra de edición de dibujo
+            var drawnItems = new L.FeatureGroup();
+            map.addLayer(drawnItems);
+
+            // Herramientas de dibujo
+            var drawControl = new L.Control.Draw({
+                position: 'topleft',
+                draw: {
+                    polygon: {
+                        shapeOptions: {color: 'purple'},
+                        allowIntersection: false,
+                        drawError: {color: 'orange',timeout: 1000},
+                        showArea: true,
+                        metric: false,
+                        repeatMode: true
+                            },
+                    polyline: {
+                        shapeOptions: {color: 'red'},
+                                },
+                    rect: {
+                        shapeOptions: {color: 'green'},
+                    },
+                    circle: {
+                        shapeOptions: {color: 'steelblue'},
+                    },
+                    marker: true
+                },
+                edit: {
+                    featureGroup: drawnItems,
+                    remove: true
+                }
+            });
+
+            map.addControl(drawControl);
+            map.on('draw:created', function (e) {
+                var type = e.layerType,
+                    layer = e.layer;
+                drawnItems.addLayer(layer);
+                });
+                
+
+            
+            //*************************************
+            // Agregarmos un WFS JGeojson con un popup
+            // agrefamo un wfs geojson con un popup
+            var owsrootUrl = 'http://localhost:8080/geoserver/cart_base/wms';
+            var defaultParameters = {
+               service: 'WFS',
+               version: '2.0',
+               request: 'GetFeature',
+               typeName: 'cart_base:colonia',
+               outputFormat: 'json',
+               format_options: 'callback:getJson',
+               SrsName: 'EPSG:4326'
+           };
+            
+            function estilo(feature){
+                return{
+                    weight: 1,
+                    color: 'transparent',
+                    fillOpacity: 0
+                };             
+            }
+               
+            var geojson;
+            var parameters = L.Util.extend(defaultParameters);
+            var URL = owsrootUrl + L.Util.getParamString(parameters);
+            var ajax = $.ajax({
+                url : URL,
+                dataType : 'json',
+                jsonpCallback : 'getJson',
+                success : function (response) {
+                geojson = new L.geoJson(response, {
+                        style:estilo,
+                        onEachFeature: function (feature, url) {
+                            popupOptions = {maxWidth: 250};
+                            url.bindPopup("<b>Municipio: </b> " + feature.properties.MUNICIPIO + "<br><b>Colonia: </b> " + feature.properties.NOMBRE, popupOptions);
+                        }
+                    }).addTo(map);
+                }
+            });
+
+            var owsrootUrl_DistritoFed = 'http://localhost:8080/geoserver/cart_base/wms';
+            var defaultParameters_DistritoFed = {
+               service: 'WFS',
+               version: '2.0',
+               request: 'GetFeature',
+               typeName: 'cart_base:distrito_federal',
+               outputFormat: 'json',
+               format_options: 'callback:getJson',
+               SrsName: 'EPSG:4326'
+           };
+            
+            function estilo_DistritoFed(feature){
+                return{
+                    weight: 1,
+                    color: 'transparent',
+                    fillOpacity: 0
+                };             
+            }
+               
+            var geojson_DistritoFed;
+            var parameters_DistritoFed = L.Util.extend(defaultParameters_DistritoFed);
+            var URL_DistritoFed = owsrootUrl_DistritoFed + L.Util.getParamString(parameters_DistritoFed);
+            $.ajax({
+                url : URL_DistritoFed,
+                dataType : 'json',
+                jsonpCallback : 'getJson',
+                success : function (response) {
+                geojson_DistritoFed= new  L.geoJson(response, {
+                        style:estilo_DistritoFed,
+                        onEachFeature: function (feature, url) {
+                            popupOptions = {maxWidth: 250};
+                            url.bindPopup("<b>Distrito Federal: </b> " + feature.properties.DISTRITO_F + "<br><b>Tipo distrito: </b> " + feature.properties.TIPO + "<br><b>Control distrito: </b> " + feature.properties.CONTROL, popupOptions);
+                        }
+                    }).addTo(map);
+                }
+            });
+
+            var owsrootUrl_distritoLocal = 'http://localhost:8080/geoserver/cart_base/wms';
+            var defaultParameters_distritoLocal = {
+               service: 'WFS',
+               version: '2.0',
+               request: 'GetFeature',
+               typeName: 'cart_base:distrito_local',
+               outputFormat: 'json',
+               format_options: 'callback:getJson',
+               SrsName: 'EPSG:4326'
+           };
+            
+            function estilo__distritoLocal(feature){
+                return{
+                    weight: 1,
+                    color: 'transparent',
+                    fillOpacity: 0
+                };             
+            }
+            
+            var geojson__distritoLocal;
+            var parameters__distritoLocal = L.Util.extend(defaultParameters_distritoLocal);
+            var URL_distritoLocal = owsrootUrl_distritoLocal + L.Util.getParamString(parameters__distritoLocal);
+            $.ajax({
+                url : URL_distritoLocal,
+                dataType : 'json',
+                jsonpCallback : 'getJson',
+                success : function (response) {
+                geojson__distritoLocal=  L.geoJson(response, {
+                        style:estilo__distritoLocal,
+                        onEachFeature: function (feature, url) {
+                            popupOptions = {maxWidth: 250};
+                            url.bindPopup("<b>Distrito Local</b> " + feature.properties.DISTRITO_L, popupOptions);
+                        }
+                    }).addTo(map);
+                }
+            });
+
+            
+            var owsrootUrl_distritoLocalDL = 'http://localhost:8080/geoserver/cart_base/wms';
+            var defaultParameters_distritoLocalDL = {
+               service: 'WFS',
+               version: '2.0',
+               request: 'GetFeature',
+               typeName: 'cart_base:distritoLocalDL',
+               outputFormat: 'json',
+               format_options: 'callback:getJson',
+               SrsName: 'EPSG:4326'
+           };
+            
+            function estilo__distritoLocalDL(feature){
+                return{
+                    weight: 1,
+                    color: 'transparent',
+                    fillOpacity: 0
+                };             
+            }
+            
+            var geojson__distritoLocalDL;
+            var parameters__distritoLocalDL = L.Util.extend(defaultParameters_distritoLocalDL);
+            var URL_distritoLocalDL = owsrootUrl_distritoLocalDL + L.Util.getParamString(parameters__distritoLocalDL);
+            $.ajax({
+                url : URL_distritoLocalDL,
+                dataType : 'json',
+                jsonpCallback : 'getJson',
+                success : function (response) {
+                geojson__distritoLocalDL=  L.geoJson(response, {
+                        style:estilo__distritoLocalDL,
+                        onEachFeature: function (feature, url) {
+                            popupOptions = {maxWidth: 250};
+                            url.bindPopup("<b>Distrito: </b> " + feature.properties.Distrito, popupOptions);
+                        }
+                    }).addTo(map);
+                }
+            });
+
+
+            var owsrootUrl_seccion = 'http://localhost:8080/geoserver/cart_base/wms';
+            var defaultParameters_seccion = {
+               service: 'WFS',
+               version: '2.0',
+               request: 'GetFeature',
+               typeName: 'cart_base:seccion',
+               outputFormat: 'json',
+               format_options: 'callback:getJson',
+               SrsName: 'EPSG:4326'
+           };
+            
+            function estilo_seccion(feature){
+                return{
+                    weight: 1,
+                    color: 'transparent',
+                    fillOpacity: 0
+                };             
+            }
+            
+            var geojson_seccion;
+            var parameters_seccion = L.Util.extend(defaultParameters_seccion);
+            var URL_seccion = owsrootUrl_seccion + L.Util.getParamString(parameters_seccion);
+            $.ajax({
+                url : URL_seccion,
+                dataType : 'json',
+                jsonpCallback : 'getJson',
+                success : function (response) {
+                geojson_seccion=  L.geoJson(response, {
+                        style:estilo_seccion,
+                        onEachFeature: function (feature, url) {
+                            popupOptions = {maxWidth: 250};
+                            url.bindPopup("<b>Distrito</b> " + feature.properties.DISTRITO + "<br><b>Distrito local: </b> " + feature.properties.DISTRITO_L + "<br><b>Municipio: </b> " + feature.properties.MUNICIPIO + "<br><b>Tipo distrito: </b> " + feature.properties.SECCION, popupOptions);
+                        }
+                    }).addTo(map);
+                }
+            });
+
+            var owsrootUrl_vocaldist = 'http://localhost:8080/geoserver/cart_base/wms';
+            var defaultParameters_vocaldist = {
+               service: 'WFS',
+               version: '2.0',
+               request: 'GetFeature',
+               typeName: 'cart_base:vocal_distrital_del_rfe',
+               outputFormat: 'json',
+               format_options: 'callback:getJson',
+               SrsName: 'EPSG:4326'
+           };
+            
+            function estilo_vocaldist(feature){
+                return{
+                    weight: 1,
+                    color: 'transparent',
+                    fillOpacity: 0
+                };             
+            }
+            
+            var geojson_vocaldist;
+            var parameters_vocaldist = L.Util.extend(defaultParameters_vocaldist);
+            var URL_vocaldist = owsrootUrl_vocaldist + L.Util.getParamString(parameters_vocaldist);
+            $.ajax({
+                url : URL_vocaldist,
+                dataType : 'json',
+                jsonpCallback : 'getJson',
+                success : function (response) {
+                geojson_vocaldist=  L.geoJson(response, {
+                        style:estilo_vocaldist,
+                        onEachFeature: function (feature, url) {
+                            popupOptions = {maxWidth: 250};
+                            url.bindPopup("<b>Vocal distrital RFE</b> " + feature.properties.VOCAL_NOMB, popupOptions);
+                        }
+                    }).addTo(map);
+                }
+            });
+
+            var owsrootUrl_vocalejecdist = 'http://localhost:8080/geoserver/cart_base/wms';
+            var defaultParameters_vocalejecdist  = {
+               service: 'WFS',
+               version: '2.0',
+               request: 'GetFeature',
+               typeName: 'cart_base:vocal_ejecutivo_distrital',
+               outputFormat: 'json',
+               format_options: 'callback:getJson',
+               SrsName: 'EPSG:4326'
+           };
+            
+            function estilo_vocalejecdist (feature){
+                return{
+                    weight: 1,
+                    color: 'transparent',
+                    fillOpacity: 0
+                };             
+            }
+            
+            var geojson_vocalejecdist ;
+            var parameters_vocalejecdist  = L.Util.extend(defaultParameters_vocalejecdist);
+            var URL_vocalejecdist = owsrootUrl_vocalejecdist + L.Util.getParamString(parameters_vocalejecdist);
+            $.ajax({
+                url : URL_vocalejecdist,
+                dataType : 'json',
+                jsonpCallback : 'getJson',
+                success : function (response) {
+                geojson_vocalejecdist=  L.geoJson(response, {
+                        style:estilo_vocalejecdist,
+                        onEachFeature: function (feature, url) {
+                            popupOptions = {maxWidth: 250};
+                            url.bindPopup("<b>Vocal Ejecutivo Distrital: </b> " + feature.properties.vocal_nomb, popupOptions);
+                        }
+                    }).addTo(map);
+                }
+            });
+
+            var owsrootUrl_vocalejecesta='http://localhost:8080/geoserver/cart_base/wms'
+            var defaultParameters_vocalejecesta = {
+                service:'WFS', 
+                version:'2.0',
+                request: 'GetFeature',
+                typeName:'cart_base:vocal_ejecutivo_estatal',
+                outputFormat: 'json',
+                format_options: 'callback:getJson',
+                SrsName:'EPSG:4326'
+            };       
+             
+            function estilo_vocalejecesta(feature){
+                return{
+                    weight: 1,
+                    color: 'transparent',
+                    fillOpacity: 0
+                };             
+            }
+            // se va agenerar un ocmportamiento dentro dle mapa quepermota que cuando pasemos el mouse dentro dle mapa, el mouse cambie y cuando de click se abra un poppup
+            var parameters_vocalejecesta = L.Util.extend(defaultParameters_vocalejecesta);
+            var URL_vocalejecesta = owsrootUrl_vocalejecesta + L.Util.getParamString(parameters_vocalejecesta);
+            var geojson_vocalejecesta;
+            $.ajax({
+			     url: URL_vocalejecesta,
+			     success: function (data) {
+				    geojson_vocalejecesta = new L.geoJson(data, {
+                        style : estilo_vocalejecesta,
+					   onEachFeature: function (feature, url) {
+                            popupOptions = {maxWidth: 250};
+                            url.bindPopup("<b>Vocal ejecutivo estatal: </b> " + feature.properties.vocal_nomb, popupOptions);
+                        }
+				    }).addTo(map);
+			     }
+		    });
+
+            var owsrootUrl_vocalestarfe='http://localhost:8080/geoserver/cart_base/wms'
+            var defaultParameters_vocalestarfe = {
+                service:'WFS', 
+                version:'2.0',
+                request: 'GetFeature',
+                typeName:'cart_base:vocal_estatal_del_rfe',
+                outputFormat: 'json',
+                format_options: 'callback:getJson',
+                SrsName:'EPSG:4326'
+            };       
+             
+            function estilo_vocalestarfe(feature){
+                return{
+                    weight: 1,
+                    color: 'transparent',
+                    fillOpacity: 0
+                };             
+            }
+            // se va agenerar un ocmportamiento dentro dle mapa quepermota que cuando pasemos el mouse dentro dle mapa, el mouse cambie y cuando de click se abra un poppup
+            var parameters_vocalestarfe = L.Util.extend(defaultParameters_vocalestarfe);
+            var URL_vocalestarfe = owsrootUrl_vocalestarfe + L.Util.getParamString(parameters_vocalestarfe);
+            var geojson_vocalestarfe;
+            $.ajax({
+			     url: URL_vocalestarfe,
+			     success: function (data) {
+				    geojson_vocalejecesta = new L.geoJson(data, {
+                        style : estilo_vocalestarfe,
+					   onEachFeature: function (feature, url) {
+                            popupOptions = {maxWidth: 250};
+                            url.bindPopup("<b>Vocal estatal: </b> " + feature.properties.VOCAL_NOMB, popupOptions);
+                        }
+				    }).addTo(map);
+			     }
+		    });
+		                
+
+            //*******************************
+            function encenderCapas(idCapa){
+                switch(idCapa){
+                    case "colonia":
+                        if (layer1.checked){
+                            geojson.addTo(map);
+                            colonia.addTo(map); 
+                        }
+                         else {
+                             map.removeLayer(geojson);
+                             map.removeLayer(colonia);
+                         }
+                        break;
+                        
+                    case "distritoFederal":
+                        if (layer2.checked){
+                            geojson_DistritoFed.addTo(map);
+                            distritoFederal.addTo(map); 
+                        }
+                         else {
+                             map.removeLayer(geojson_DistritoFed);
+                             map.removeLayer(distritoFederal);
+                         }
+                        break;
+                        
+                    case "distritoLocal":
+                        if (layer3.checked){
+                            geojson__distritoLocal.addTo(map);
+                            distritoLocal.addTo(map); 
+                        }
+                         else {
+                             map.removeLayer(geojson__distritoLocal);
+                             map.removeLayer(distritoLocal);
+                         }
+                        break;
+                    
+                    case "seccion":
+                        if (layer4.checked){
+                            geojson_seccion.addTo(map);
+                            seccion.addTo(map); 
+                        }
+                         else {
+                             map.removeLayer(geojson_seccion);
+                             map.removeLayer(seccion);
+                         }
+                        break;
+                    
+                    case "vocalDistrlRFE":
+                        if (layer5.checked){
+                            geojson_vocaldist.addTo(map);
+                            vocalDistrlRFE.addTo(map); 
+                        }
+                         else {
+                             map.removeLayer(geojson_vocaldist);
+                             map.removeLayer(vocalDistrlRFE);
+                         }
+                        break;
+                        
+                    case "vocalEjecDistrl":
+                        if (layer6.checked){
+                            geojson_vocalejecdist.addTo(map);
+                            vocalEjecDistrl.addTo(map); 
+                        }
+                         else {
+                             map.removeLayer(geojson_vocalejecdist);   
+                             map.removeLayer(vocalEjecDistrl);
+                         }
+                        break;
+                    
+                    case "vocalEjecEstat":
+                        if (layer7.checked){
+                            geojson_vocalejecesta.addTo(map);
+                            vocalEjecEstat.addTo(map); 
+                        }
+                         else {
+                             map.removeLayer(geojson_vocalejecesta);   
+                             map.removeLayer(vocalEjecEstat);
+                         }
+                        break;
+                        
+                    case "vocalEjecEstatRFE":
+                        if (layer8.checked){
+                            geojson_vocalestarfe.addTo(map);
+                            vocalEjecEstatRFE.addTo(map); 
+                        }
+                         else {
+                             map.removeLayer(geojson_vocalestarfe);   
+                             map.removeLayer(vocalEjecEstatRFE);
+                         }
+                        break;   
+                           
+                    case "distritoLocalDL":
+                        if (layer9.checked){
+                            geojson__distritoLocalDL.addTo(map);
+                            distritoLocalDL.addTo(map); 
+                        }
+                         else {
+                             map.removeLayer(geojson__distritoLocalDL);   
+                             map.removeLayer(distritoLocalDL);
+                         }
+                        break;             
+                }
+            }
+
+        </script>
+
+    </body>
+</html>
